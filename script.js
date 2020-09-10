@@ -14,15 +14,12 @@ function buildChart() {
 
   /* ===== SET UP CHART =====*/
 
-  var x = d3.scaleBand().range([0, w]),
-      y = d3.scaleLinear().range([h, 0]);
-
-  var w = 400;
-  var barSpacing = 15;
-  var barThickness = 10;
+  var w = 500;
+  var barSpacing = 20;
+  var barThickness = 15;
   var vertPadding = 5;
   var h = barSpacing * data.length + vertPadding;
-  var margin = {top: 20, right: 20, bottom: 50, left: 50},
+  var margin = {top: 20, right: 20, bottom: 50, left: 60},
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
 
@@ -35,20 +32,16 @@ function buildChart() {
   var xScale = d3.scaleLinear()
     .domain([0, 1.1 * d3.max(data, function(d) { return d.Waste; })])
     .range([0,w]);
-
-  var yScale = d3.scaleLinear()
-    .domain([0, data.length])
-    .range([h,0]);
+  var yScale = d3.scaleBand()
+    .domain(data.map(function(d) { return d.Attribute; }))
+    .range([0,h]);
 
   var xAxis = d3.axisBottom()
     .scale(xScale)
     .ticks(5)
-    .tickSize(-h, 0)
-
+    .tickSize(-h, 0);
   var yAxis = d3.axisLeft()
-    .scale(yScale)
-    .ticks(10)
-    // .ticks(data.map(function(d) { return d.Attribute; }))
+    .scale(yScale);
 
   var group = g.selectAll('g')
     .data(data)
@@ -56,21 +49,20 @@ function buildChart() {
     .append('g')
     .attr("transform", "translate(" + margin.left + "," + 0 + ")");
 
+  var tooltip = d3.select("body")
+    .append("div")
+    .attr("class", "toolTip")
+    .style("opacity", 0.8);
+
+/* --- Bar initialize ---*/
   var bars = group
       .append('rect')
-      .attr('y', function(d, i) {
-        return i * (barSpacing) + vertPadding
-      })
+      .attr('y', function(d, i) {return i * (barSpacing) + vertPadding})
       .attr('height', function(d) {
-        return h - yScale(barThickness/barSpacing);
-      })
-      .attr('fill', function (d,i) {
-        return setBarColors(d,i);
-      });
-
-  /* --- Bar initialize ---*/
-  bars.attr('width', function(d) {
-        return xScale(d.Waste)});
+        return h - (barSpacing-barThickness) - yScale(
+          data.map(function(d) {return d.Attribute; })[data.length-1])})
+      .attr('width', function(d) {return xScale(d.Waste)})
+      .attr('fill', function (d,i) {return setBarColors(d,i);});
 
   g.append('g')
     .style('font', '16px arial')
@@ -79,7 +71,7 @@ function buildChart() {
 
   g.append('g')
     .style('font', '16px arial')
-    .attr('transform', 'translate(' + margin.left/2 + ',' + 0 + ')')
+    .attr('transform', 'translate(' + margin.left + ',' + 0 + ')')
     .call(yAxis);
 
  /* ===== LABELS =====*/
@@ -106,16 +98,18 @@ function buildChart() {
       .style("text-anchor", "middle")
       .text("Attribute");
 
-/* ===== Hover effects ===== */
+/* ===== Mouse effects ===== */
   g.selectAll("g")
    .data(data)
+   .attr("class", "bar")
    .on("click",     onMouseClick) //Add listener for the mouseclick event
-   .on("mouseover", onMouseOver) //Add listener for the mouseover event
+   .on("mouseover", function(d) {onMouseOver(d)}) //Add listener for the mouseover event
    .on("mouseout",  onMouseOut)   //Add listener for the mouseout event
-   .attr("x", function(d) { return x(d.Attribute); })
-   .attr("y", function(d) { return y(d.Waste); })
-   .attr("width", x.bandwidth())
-   .attr("height", function(d) { return h - y(d.Waste); })
+   .attr("x",       function(d) { return xScale(d.Attribute); })
+   .attr("y",       function(d) { return yScale(d.Waste); })
+   .attr("width",   function(d) { return xScale(d.Waste); })
+   .attr("height",  h - (barSpacing-barThickness) -
+                     function(d) { return yScale(d.Waste); })
 
   /* ===== Functions ===== */
 
@@ -127,7 +121,9 @@ function buildChart() {
   };
 
   //mouseover event handler function
-  function onMouseClick(d) {
+  function onMouseClick() {
+    d3.selectAll('rect')
+      .style('fill', setBarColors());
     d3.select(this)
       .select('rect')
       .transition().duration(50)
@@ -136,25 +132,14 @@ function buildChart() {
 
   //mouseover event handler function
   function onMouseOver(d) {
-    d3.mouse(this);
-    group.append('title')
-      .attr('class', 'val')
-      .text(function (d) {
-        return (d.Waste*100).toFixed(2) + '%';
-      })
-      // .attr('text-anchor', 'start')
-      .attr('x', function(d) { return x(d.Attribute); } + 10)
-      .attr('y', function(d) { return y(d.Waste); })
-      .attr('font-family', 'arial, sans-serif')
-      .attr('font-size', '12px')
-      .attr('fill', '#333')
-      .transition().duration(250)
-      .attr('opacity', 1)
+    tooltip.style("left", d3.event.pageX - 50 + "px")
+        .style("top", d3.event.pageY - 70 + "px")
+        .style("display", "inline-block")
+        .text((d.Waste*100).toFixed(2) + '%');
   }
 
   //mouseout event handler function
-  function onMouseOut(d) {
-      d3.selectAll('.val')
-        .remove()
+  function onMouseOut() {
+    tooltip.style("display", "none");
   }
 }
