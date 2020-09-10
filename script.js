@@ -1,6 +1,7 @@
 var d3;
 var data = "INSP_defect_rate.csv";
 
+
 d3.csv(data, function(dataset) {
   // if (error) {
   //     throw error;
@@ -14,28 +15,23 @@ function buildChart() {
 
   /* ===== SET UP CHART =====*/
 
-  var x = d3.scaleBand().range([0, w]).padding(0.25),
+  var x = d3.scaleBand().range([0, w]),
       y = d3.scaleLinear().range([h, 0]);
 
-  var w = 350;
-  var margin = 50
+  var w = 400;
   var barSpacing = 15;
   var barThickness = 10;
   var vertPadding = 5;
   var h = barSpacing * data.length + vertPadding;
+  var margin = {top: 20, right: 20, bottom: 50, left: 75},
+    width = w - margin.left - margin.right,
+    height = h - margin.top - margin.bottom;
 
-  var svg = d3.select('.container')
+  var g = d3.select('.container')
           .append('svg')
-          .attr('width', w+margin)
-          .attr('height', h+margin);
-
-  var group = svg.selectAll('g')
-    .data(data)
-    .enter()
-    .append('g');
-
-  var g = svg.append("g")
-          .attr("transform", "translate(" + 50 + "," + ")");
+          .attr('width', width + margin.left + margin.right)
+          .attr('height', height + margin.top + margin.bottom)
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   var xScale = d3.scaleLinear()
     .domain([0, 1.1 * d3.max(data, function(d) { return d.Waste; })])
@@ -52,110 +48,74 @@ function buildChart() {
 
   var yAxis = d3.axisLeft()
     .scale(yScale)
-    .ticks(data.map(function(d) { return d.Attribute; }));
+    .ticks(data.map(function(d) { return d.Attribute; }))
 
-  group.append("text")
-     .attr("transform", "translate(100,0)")
-     .attr("x", 0)
-     .attr("y", 0)
-     .attr("font-size", "18px")
-     .text("Attribute vs Waste")
-
-  /* ===== BARS =====*/
+  var group = g.selectAll('g')
+    .data(data)
+    .enter()
+    .append('g')
+    .attr("transform", "translate(" + margin.left + "," + 0 + ")");
 
   var bars = group
-    .append('rect')
-    .attr('y', function(d, i) {
-      return i * (barSpacing) + vertPadding
-    })
-    .attr('height', function(d) {
-      return h - yScale(barThickness/barSpacing);
-    })
-    .attr('fill', function (d,i) {
-      return setBarColors(d,i);
-    });
+      .append('rect')
+      .attr('y', function(d, i) {
+        return i * (barSpacing) + vertPadding
+      })
+      .attr('height', function(d) {
+        return h - yScale(barThickness/barSpacing);
+      })
+      .attr('fill', function (d,i) {
+        return setBarColors(d,i);
+      });
+
+  /* --- Bar initialize ---*/
+  bars.attr('width', function(d) {
+        return xScale(d.Waste)});
 
   g.append('g')
     .style('font', '16px arial')
-    .attr('transform', 'translate(0,' + h + ')')
+    .attr('transform', 'translate(' + margin.left + ',' + h + ')')
     .call(xAxis);
 
   g.append('g')
     .style('font', '16px arial')
+    .attr('transform', 'translate(' + margin.left + ',' + 0 + ')')
     .call(yAxis);
 
- // text labels
- g.append("text")
-       .attr("transform",
-             "translate(" + (w/2) + " ," +
-                            (h + margin + 20) + ")")
-       .style("text-anchor", "middle")
-       .text("Waste");
+     /* ===== LABELS =====*/
 
- // g.append("text")
- //      .attr("transform", "rotate(-90)")
- //      .attr("y", 0 - margin.left)
- //      .attr("x",0 - (height / 2))
- //      .attr("dy", "1em")
- //      .style("text-anchor", "middle")
- //      .text("Attribute");
+     group.append("text")
+        .attr("transform", "translate(0,0)")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("font-size", "18px")
+        .text("Attribute vs Waste")
 
+     g.append("text")
+           .attr("transform",
+                 "translate(" + (w/2) + "," +
+                                (h + margin.bottom) + ")")
+           .style("text-anchor", "middle")
+           .text("Waste");
+
+     g.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 0 - margin.left)
+          .attr("x", 0 - (height / 2))
+          .attr("dy", "1em")
+          .style("text-anchor", "middle")
+          .text("Attribute");
+
+/* ===== Hover effects ===== */
   g.selectAll("g")
    .data(data)
+   .on("click",     onMouseClick) //Add listener for the mouseclick event
    .on("mouseover", onMouseOver) //Add listener for the mouseover event
-   .on("mouseout", onMouseOut)   //Add listener for the mouseout event
-   .attr("y", function(d) { return x(d.Attribute); })
-   .attr("x", function(d) { return y(d.Waste); })
+   .on("mouseout",  onMouseOut)   //Add listener for the mouseout event
+   .attr("x", function(d) { return x(d.Attribute); })
+   .attr("y", function(d) { return y(d.Waste); })
    .attr("width", x.bandwidth())
-   .attr("height", function(d) { return h - y(d.Waste); });
-
-   /* --- bar initialize ---*/
-   bars
-     .transition().duration(100)
-     .attr('width', function(d) {
-         return xScale(d.Waste);
-       });
-
-   var textLabels = group
-     .append('text')
-     .text(function (d) {
-       return (d.Waste*100).toFixed(2) + '%';
-     })
-     .attr('text-anchor', 'start')
-     .attr('x', function(d) {
-       return xScale(d.Waste) + 10;
-     })
-     .attr('y', function(d, i) {
-       return i * (barSpacing) + vertPadding + (barSpacing /2);
-     })
-     .attr('font-family', 'arial, sans-serif')
-     .attr('font-size', '12px')
-     .attr('fill', '#333')
-     .attr('opacity', 0)
-     .transition().duration(100)
-     .attr('opacity', 1)
-
-  /* ===== Hover effects ===== */
-
-    group.on('mouseover', function(d){
-      d3.select(this)
-        .select('rect')
-        .transition().duration(250)
-        .style('fill', 'DeepSkyBlue');
-    })
-      .append('title')
-      .text(function (d) {
-          return (d.Waste*100).toFixed(2) + '%' ;
-    })
-
-    group.on('mouseout', function(d, i){
-        d3.select(this)
-        .select('rect')
-        .transition().duration(250)
-        .style('fill', function(d,i){
-          return setBarColors(d);
-      });
-    })
+   .attr("height", function(d) { return h - y(d.Waste); })
 
   /* ===== Functions ===== */
 
@@ -167,39 +127,33 @@ function buildChart() {
   };
 
   //mouseover event handler function
-  function onMouseOver(d, i) {
-      d3.select(this).attr('class', 'highlight');
-      d3.select(this)
-        .transition()     // adds animation
-        .duration(100)
-        .attr('width', x.bandwidth() + 5)
-        .attr("y", function(d) { return y(d.Waste) - 10; })
-        .attr("height", function(d) { return height - y(d.Waste) + 10; });
+  function onMouseClick(d) {
+    d3.select(this)
+      .select('rect')
+      .transition().duration(50)
+      .style('fill', 'DeepSkyBlue');
+  }
 
-      g.append("text")
-       .attr('class', 'val')
-       .attr('x', function() {
-           return x(d.Attribute);
-       })
-       .attr('y', function() {
-           return y(d.Waste) - 15;
-       })
-       .text(function() {
-           return [ '$' +d.Waste];  // Value of the text
-       });
+  //mouseover event handler function
+  function onMouseOver(d) {
+    group.append('title')
+      // .attr('class', 'val')
+      .text(function (d) {
+        return (d.Waste*100).toFixed(2) + '%';
+      })
+      // .attr('text-anchor', 'start')
+      .attr('x', function(d) { return x(d.Attribute); } + 10)
+      .attr('y', function(d) { return y(d.Waste); })
+      // .attr('font-family', 'arial, sans-serif')
+      // .attr('font-size', '12px')
+      // .attr('fill', '#333')
+      // .attr('opacity', 0)
+      // .transition().duration(250)
+      // .attr('opacity', 1)
   }
 
   //mouseout event handler function
-  function onMouseOut(d, i) {
-      // use the text label class to remove label on mouseout
-      d3.select(this).attr('class', 'bar');
-      d3.select(this)
-        .transition()     // adds animation
-        .duration(400)
-        .attr('width', x.bandwidth())
-        .attr("y", function(d) { return y(d.Waste); })
-        .attr("height", function(d) { return height - y(d.Waste); });
-
+  function onMouseOut(d) {
       d3.selectAll('.val')
         .remove()
   }
