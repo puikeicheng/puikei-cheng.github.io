@@ -1,0 +1,56 @@
+body {
+  background-color: #F9F9F9;
+  font-family: "Segoe UI",Arial,sans-serif;
+  padding: 50px;
+}
+
+h1 {
+  font-family: "Segoe UI",Arial,sans-serif;
+  font-size: 1.5em;
+}
+
+h4 {
+  font-family: "Segoe UI",Arial,sans-serif;
+  font-size: 1em;
+}
+
+svg {
+  overflow: visible;
+  margin: 10px 20px;
+}
+
+path {  stroke: #fff; }
+/* path:hover {  opacity:0.9; } */
+/* rect:hover {  fill:blue; } */
+.axis {  font: 10px sans-serif; }
+.legend tr{    border-bottom:1px solid grey; }
+.legend tr:first-child{    border-top:1px solid grey; }
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: lightgrey;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  stroke: lightgrey
+}
+.y.axis path {
+  stroke: lightgrey
+}
+
+.legend{
+    margin-bottom:76px;
+    display:inline-block;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+.legend td{
+    padding:4px 5px;
+    vertical-align:bottom;
+}
+.legendFreq, .legendPerc{
+    align:right;
+    width:50px;
+}
