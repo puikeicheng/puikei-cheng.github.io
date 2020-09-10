@@ -1,7 +1,6 @@
 var d3;
 var data = "INSP_defect_rate.csv";
 
-
 d3.csv(data, function(dataset) {
   // if (error) {
   //     throw error;
@@ -23,14 +22,14 @@ function buildChart() {
   var barThickness = 10;
   var vertPadding = 5;
   var h = barSpacing * data.length + vertPadding;
-  var margin = {top: 20, right: 20, bottom: 50, left: 75},
+  var margin = {top: 20, right: 20, bottom: 50, left: 50},
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
 
   var g = d3.select('.container')
           .append('svg')
           .attr('width', width + margin.left + margin.right)
-          .attr('height', height + margin.top + margin.bottom)
+          .attr('height', height + margin.top + margin.bottom + 50)
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   var xScale = d3.scaleLinear()
@@ -48,7 +47,8 @@ function buildChart() {
 
   var yAxis = d3.axisLeft()
     .scale(yScale)
-    .ticks(data.map(function(d) { return d.Attribute; }))
+    .ticks(10)
+    // .ticks(data.map(function(d) { return d.Attribute; }))
 
   var group = g.selectAll('g')
     .data(data)
@@ -79,32 +79,32 @@ function buildChart() {
 
   g.append('g')
     .style('font', '16px arial')
-    .attr('transform', 'translate(' + margin.left + ',' + 0 + ')')
+    .attr('transform', 'translate(' + margin.left/2 + ',' + 0 + ')')
     .call(yAxis);
 
-     /* ===== LABELS =====*/
+ /* ===== LABELS =====*/
 
-     group.append("text")
-        .attr("transform", "translate(0,0)")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("font-size", "18px")
-        .text("Attribute vs Waste")
+ g.append("text")
+    .attr("transform", "translate(0,0)")
+    .attr("x", width/2)
+    .attr("y", 0)
+    .attr("font-size", "18px")
+    .text("Attribute vs Waste")
 
-     g.append("text")
-           .attr("transform",
-                 "translate(" + (w/2) + "," +
-                                (h + margin.bottom) + ")")
-           .style("text-anchor", "middle")
-           .text("Waste");
+ g.append("text")
+       .attr("transform",
+             "translate(" + ((width/2) + margin.left) + "," +
+                            (h+40) + ")")
+       .style("text-anchor", "middle")
+       .text("Waste");
 
-     g.append("text")
-          .attr("transform", "rotate(-90)")
-          .attr("y", 0 - margin.left)
-          .attr("x", 0 - (height / 2))
-          .attr("dy", "1em")
-          .style("text-anchor", "middle")
-          .text("Attribute");
+ g.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x", 0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Attribute");
 
 /* ===== Hover effects ===== */
   g.selectAll("g")
@@ -136,20 +136,20 @@ function buildChart() {
 
   //mouseover event handler function
   function onMouseOver(d) {
+    d3.mouse(this);
     group.append('title')
-      // .attr('class', 'val')
+      .attr('class', 'val')
       .text(function (d) {
         return (d.Waste*100).toFixed(2) + '%';
       })
       // .attr('text-anchor', 'start')
       .attr('x', function(d) { return x(d.Attribute); } + 10)
       .attr('y', function(d) { return y(d.Waste); })
-      // .attr('font-family', 'arial, sans-serif')
-      // .attr('font-size', '12px')
-      // .attr('fill', '#333')
-      // .attr('opacity', 0)
-      // .transition().duration(250)
-      // .attr('opacity', 1)
+      .attr('font-family', 'arial, sans-serif')
+      .attr('font-size', '12px')
+      .attr('fill', '#333')
+      .transition().duration(250)
+      .attr('opacity', 1)
   }
 
   //mouseout event handler function
