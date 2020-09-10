@@ -1,5 +1,5 @@
 var d3;
-var data = "../INSP_defect_rate.csv";
+var data = "INSP_defect_rate.csv";
 
 d3.csv(data, function(dataset) {
   // if (error) {
