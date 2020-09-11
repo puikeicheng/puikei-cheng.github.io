@@ -1,34 +1,59 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Inspection Dashboard</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="./styles.css" type="text/css">
-    <script src="https://d3js.org/d3.v3.min.js"></script>
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script src="./script.js" defer></script>
-  </head>
+body {
+  background-color: #F9F9F9;
+  font-family: "Segoe UI",Arial,sans-serif;
+  padding: 50px;
+}
 
-  <body>
-    <h1>
-      Inspection Dashboard
-    </h1>
-    <h4>
-      Observed Unit Waste Rate
-    </h4>
+h1 {
+  font-family: "Segoe UI",Arial,sans-serif;
+  font-size: 1.5em;
+}
 
-    <p>
-      Period Starting/Period Ending
-    </p>
-    <div id='HorzBars'></div>
-    <h4>
-      Observed Unit Defect Rates For Selected Range
-    </h4>
-    <p>
-      Selected Attribute
-    </p>
-    <div id='Multi'></div>
-  </body>
-</html>
+h4 {
+  font-family: "Segoe UI",Arial,sans-serif;
+  font-size: 1em;
+}
+
+svg {
+  overflow: visible;
+  margin: 10px 20px;
+}
+
+path {  stroke: #fff; }
+/* path:hover {  opacity:0.9; } */
+/* rect:hover {  fill:blue; } */
+.axis {  font: 10px sans-serif; }
+.legend tr{    border-bottom:1px solid grey; }
+.legend tr:first-child{    border-top:1px solid grey; }
+
+.axis path,
+.axis line {
+  fill: lightgrey;
+  shape-rendering: crispEdges;
+}
+
+.toolTip {
+  position: absolute;
+  display: none;
+  min-width: 80px;
+  height: auto;
+  background: none repeat scroll 0 0 #ffffff;
+  border: 1px solid #6F257F;
+  padding: 12px;
+  text-align: center;
+}
+
+.legend{
+    margin-bottom:76px;
+    display:inline-block;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+.legend td{
+    padding:4px 5px;
+    vertical-align:bottom;
+}
+.legendFreq, .legendPerc{
+    align:right;
+    width:50px;
+}
