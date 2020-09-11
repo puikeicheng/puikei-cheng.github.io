@@ -1,5 +1,6 @@
 var d3
-var data = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_defect_rate.csv";
+var defectData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_defect_rate.csv";
+var wasteData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_waste_rate.csv";
 var freqData=[
 {State:'AL',freq:{low:4786, mid:1319, high:249}}
 ,{State:'AZ',freq:{low:1101, mid:412, high:674}}
@@ -13,17 +14,18 @@ var freqData=[
 ,{State:'KS',freq:{low:162, mid:379, high:471}}
 ];
 
-d3.csv(data, function(dataset) {
+d3.csv(defectData, function(dataset) {
   data = dataset;
   buildChart('#HorzBars')
+  dashboard('#Multi', freqData);
 });
 
-// buildChart('#HorzBars', defectData);
-dashboard('#Multi', freqData);
+/* ---------------------- First dashboard ---------------------- */
 
 function buildChart(id) {
 
   /* ===== SET UP CHART =====*/
+
   var w = 500;
   var barSpacing = 20;
   var barThickness = 15;
@@ -33,7 +35,7 @@ function buildChart(id) {
     width = w - margin.left - margin.right,
     height = h - margin.top - margin.bottom;
 
-  var g = d3.select(id)
+  var hB = d3.select(id)
           .append('svg')
           .attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom + 50)
@@ -54,7 +56,7 @@ function buildChart(id) {
   var yAxis = d3.axisLeft()
     .scale(yScale);
 
-  var group = g.selectAll('g')
+  var group = hB.selectAll('hB')
     .data(data)
     .enter()
     .append('g')
@@ -65,8 +67,9 @@ function buildChart(id) {
     .attr("class", "toolTip")
     .style("opacity", 0.8);
 
-/* --- Bar initialize ---*/
-  var bars = group
+/* --- INITIALIZE BARS ---*/
+
+  var hbars = group
       .append('rect')
       .attr('y', function(d, i) {return i * (barSpacing) + vertPadding})
       .attr('height', function(d) {
@@ -75,42 +78,42 @@ function buildChart(id) {
       .attr('width', function(d) {return xScale(d.Waste)})
       .attr('fill', function (d,i) {return setBarColors(d,i);});
 
-  g.append('g')
+  hB.append('g')
     .style('font', '16px arial')
     .attr('transform', 'translate(' + margin.left + ',' + h + ')')
     .call(xAxis);
 
-  g.append('g')
+  hB.append('g')
     .style('font', '16px arial')
     .attr('transform', 'translate(' + margin.left + ',' + 0 + ')')
     .call(yAxis);
 
  /* ===== LABELS =====*/
 
- g.append("text")
+ hB.append("text")
     .attr("transform", "translate(0,0)")
     .attr("x", width/2)
     .attr("y", -10)
     .attr("font-size", "18px")
     .text("Attribute vs Waste")
 
- g.append("text")
-       .attr("transform",
-             "translate(" + ((width/2) + margin.left) + "," +
-                            (h+40) + ")")
-       .style("text-anchor", "middle")
-       .text("Waste");
+ hB.append("text")
+    .attr("transform",
+       "translate(" + ((width/2) + margin.left) + "," +
+                      (h+40) + ")")
+    .style("text-anchor", "middle")
+    .text("Waste");
 
- g.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 0 - margin.left)
-      .attr("x", 0 - (height / 2))
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .text("Attribute");
+ hB.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Attribute");
 
 /* ===== Mouse effects ===== */
-  g.selectAll("g")
+  hB.selectAll("g")
    .data(data)
    .attr("class", "bar")
    .on("click",     onMouseClick) //Add listener for the mouseclick event
@@ -124,8 +127,7 @@ function buildChart(id) {
 
   /* ===== Functions ===== */
 
-  /* --- BAR COLORS ---*/
-
+  //bar colors//
   function setBarColors (d,i) {
       var colors = ['DarkGray'];
       return colors[0];
@@ -154,6 +156,8 @@ function buildChart(id) {
     tooltip.style("display", "none");
   }
 }
+
+/* ---------------------- Second dashboard ---------------------- */
 
 function dashboard(id, fData){
     var barColor = 'steelblue';
