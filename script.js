@@ -1,6 +1,6 @@
 var d3
-var defectData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_defect_rate.csv";
-var wasteData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_waste_rate.csv";
+var defectData = "INSP_defect_rate.csv";
+var wasteData = "INSP_waste_rate.csv";
 
 d3.csv(defectData, function(dataset) {
   data = dataset;
