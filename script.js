@@ -13,6 +13,24 @@ d3.csv(defectData, function(dataset) {
   Bar_Line('#AttributeDefect', data)
 });
 
+d3.csv(mDData, function(data) {
+  var dataset   = [];
+  var attriCols = data.columns.filter(function(att) {return att.includes('Attr')})
+  for (var i = 0; i < data.length/2; i++) {
+    dataset.push({Date: data[i]['Date'],
+                Waste: {Sup1: [],
+                        Sup2: []}});
+  }
+  console.log(dataset.Waste)
+  for (var i = 0; i < attriCols.length; i++) {
+    (dataset.Waste).push(i);
+    (dataset.Waste.Sup2).push(i);
+  }
+  console.log(dataset)
+  // console.log(dataset)
+  // Line_Pie('#SupplierWaste', dataset);
+  // Bar_Line('#AttributeDefect', dataset);
+});
 
 /* ---------------------- Line and Pie dashboard ---------------------- */
 
