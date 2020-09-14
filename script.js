@@ -163,18 +163,9 @@ function buildChart(id, data) {
 /* ---------------------- Second dashboard ---------------------- */
 
 function dashboard(id, data){
-    var wData = [];
-    for (var i = 0; i < data.length; i++) {
-      wData.push({Date: data[i]['Date'],
-                  freq: {Sup1: data[i]['Sup1'],
-                         Sup2: data[i]['Sup2']}});
-    }
 
     var barColor = 'DarkGray';
     function segColor(c){ return {Sup1:"Pear", Sup2:"SteelBlue"}[c]; }
-
-    // compute total for each date.
-    wData.forEach(function(d){d.total=d.freq.Sup1+d.freq.Sup2;});
 
     // function to handle histogram.
     function histoGram(fD){
@@ -191,7 +182,6 @@ function dashboard(id, data){
         // create function for x-axis mapping.
         var x = d3.scale.ordinal().rangeRoundBands([0, hGDim.w], 0.1)
                 .domain(fD.map(function(d) { return d[0]; }));
-        console.log(wData[0])
 
         // Add x-axis to the histogram svg.
         hGsvg.append("g").attr("class", "x axis")
@@ -355,8 +345,17 @@ function dashboard(id, data){
     }
 
     // calculate total frequency by segment for all date.
+    var wData = [];
+    for (var i = 0; i < data.length; i++) {
+      wData.push({Date: data[i]['Date'],
+                  freq: {Sup1: data[i]['Sup1'],
+                         Sup2: data[i]['Sup2']}});
+    }
+    // compute total for each date.
+    wData.forEach(function(d){d.total=d.freq.Sup1+d.freq.Sup2;});
+
     var tF = ['Sup1','Sup2'].map(function(d){
-        return {type:d, freq: d3.sum(wData.map(function(t){ return t.freq[d];}))};
+        return {type:d, freq: d3.sum(wData.map(function(t){return t.freq[d];}))};
     });
 
     // calculate total frequency by date for all segment.
