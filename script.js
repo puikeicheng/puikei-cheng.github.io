@@ -2,30 +2,31 @@ var d3
 var defectData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_defect_rate.csv";
 var wasteData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_waste_rate.csv";
 var freqData=[
-{State:'AL',freq:{low:4786, mid:1319, high:249}}
-,{State:'AZ',freq:{low:1101, mid:412, high:674}}
-,{State:'CT',freq:{low:932, mid:2149, high:418}}
-,{State:'DE',freq:{low:832, mid:1152, high:1862}}
-,{State:'FL',freq:{low:4481, mid:3304, high:948}}
-,{State:'GA',freq:{low:1619, mid:167, high:1063}}
-,{State:'IA',freq:{low:1819, mid:247, high:1203}}
-,{State:'IL',freq:{low:4498, mid:3852, high:942}}
-,{State:'IN',freq:{low:797, mid:1849, high:1534}}
-,{State:'KS',freq:{low:162, mid:379, high:471}}
-];
+    {State:'AL',freq:{low:4786, mid:1319, high:249}}
+    ,{State:'AZ',freq:{low:1101, mid:412, high:674}}
+    ,{State:'CT',freq:{low:932, mid:2149, high:418}}
+    ,{State:'DE',freq:{low:832, mid:1152, high:1862}}
+    ,{State:'FL',freq:{low:4481, mid:3304, high:948}}
+    ,{State:'GA',freq:{low:1619, mid:167, high:1063}}
+    ,{State:'IA',freq:{low:1819, mid:247, high:1203}}
+    ,{State:'IL',freq:{low:4498, mid:3852, high:942}}
+    ,{State:'IN',freq:{low:797, mid:1849, high:1534}}
+    ,{State:'KS',freq:{low:162, mid:379, high:471}}
+    ];
 
 d3.csv(defectData, function(dataset) {
   data = dataset;
   buildChart('#HorzBars', data)
 });
 d3.csv(wasteData, function(dataset) {
-  data = dataset;
-  dashboard('#Multi', data);
+  wData = dataset;
+
+  dashboard('#Multi', wData);
 });
 
 /* ---------------------- First dashboard ---------------------- */
 
-function buildChart(id) {
+function buildChart(id, data) {
 
   /* ===== SET UP CHART =====*/
 
@@ -53,9 +54,8 @@ function buildChart(id) {
 
   var xAxis = d3.axisBottom()
     .scale(xScale)
-    .ticks(5)
+    .ticks(5,'.2%')
     .tickSize(-h, 0)
-    // .tickFormat(format('%'));
   var yAxis = d3.axisLeft()
     .scale(yScale);
 
@@ -162,12 +162,19 @@ function buildChart(id) {
 
 /* ---------------------- Second dashboard ---------------------- */
 
-function dashboard(id, fData){
-    var barColor = 'steelblue';
-    function segColor(c){ return {Sup1:"#807dba", Sup2:"#e08214"}[c]; }
+function dashboard(id, data){
+    var wData = [];
+    for (var i = 0; i < data.length; i++) {
+      wData.push({Date: data[i]['Date'],
+                  freq: {Sup1: data[i]['Sup1'],
+                         Sup2: data[i]['Sup2']}});
+    }
 
-    // compute total for each state.
-    fData.forEach(function(d){d.total=d.Sup1+d.Sup2;});
+    var barColor = 'DarkGray';
+    function segColor(c){ return {Sup1:"Pear", Sup2:"SteelBlue"}[c]; }
+
+    // compute total for each date.
+    wData.forEach(function(d){d.total=d.freq.Sup1+d.freq.Sup2;});
 
     // function to handle histogram.
     function histoGram(fD){
@@ -184,6 +191,7 @@ function dashboard(id, fData){
         // create function for x-axis mapping.
         var x = d3.scale.ordinal().rangeRoundBands([0, hGDim.w], 0.1)
                 .domain(fD.map(function(d) { return d[0]; }));
+        console.log(wData[0])
 
         // Add x-axis to the histogram svg.
         hGsvg.append("g").attr("class", "x axis")
@@ -215,8 +223,8 @@ function dashboard(id, fData){
             .attr("text-anchor", "middle");
 
         function mouseover(d){  // utility function to be called on mouseover.
-            // filter for selected state.
-            var st = fData.filter(function(s){ return s.State == d[0];})[0],
+            // filter for selected date.
+            var st = wData.filter(function(s){ return s.Date == d[0];})[0],
                 nD = d3.keys(st.freq).map(function(s){ return {type:s, freq:st.freq[s]};});
 
             // call update functions of pie-chart and legend.
@@ -282,14 +290,14 @@ function dashboard(id, fData){
         // Utility function to be called on mouseover a pie slice.
         function mouseover(d){
             // call the update function of histogram with new data.
-            hG.update(fData.map(function(v){
-                return [v.State,v.freq[d.data.type]];}),segColor(d.data.type));
+            hG.update(wData.map(function(v){
+                return [v.Date,v.freq[d.data.type]];}),segColor(d.data.type));
         }
         //Utility function to be called on mouseout a pie slice.
         function mouseout(d){
             // call the update function of histogram with all data.
-            hG.update(fData.map(function(v){
-                return [v.State,v.total];}), barColor);
+            hG.update(wData.map(function(v){
+                return [v.Date,v.total];}), barColor);
         }
         // Animating the pie-slice requiring a custom function which specifies
         // how the intermediate paths should be drawn.
@@ -340,19 +348,19 @@ function dashboard(id, fData){
         }
 
         function getLegend(d,aD){ // Utility function to compute percentage.
-            return d3.format("%")(d.freq/d3.sum(aD.map(function(v){ return v.freq; })));
+            return d3.format(".2%")(d.freq/d3.sum(aD.map(function(v){ return v.freq; })));
         }
 
         return leg;
     }
 
-    // calculate total frequency by segment for all state.
-    var tF = ['low','mid','high'].map(function(d){
-        return {type:d, freq: d3.sum(fData.map(function(t){ return t.freq[d];}))};
+    // calculate total frequency by segment for all date.
+    var tF = ['Sup1','Sup2'].map(function(d){
+        return {type:d, freq: d3.sum(wData.map(function(t){ return t.freq[d];}))};
     });
 
-    // calculate total frequency by state for all segment.
-    var sF = fData.map(function(d){return [d.State,d.total];});
+    // calculate total frequency by date for all segment.
+    var sF = wData.map(function(d){return [d.Date,d.total];});
 
     var hG = histoGram(sF), // create the histogram.
         pC = pieChart(tF), // create the pie-chart.
