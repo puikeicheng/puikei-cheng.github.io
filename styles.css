@@ -35,23 +35,24 @@ path {  stroke: #fff; }
 .toolTip {
   position: absolute;
   display: none;
-  min-width: 80px;
+  max-width: 70px;
   height: auto;
   background: none repeat scroll 0 0 #ffffff;
   border: 1px solid #6F257F;
-  padding: 12px;
+  padding: 5px;
   text-align: center;
+  font-size: .75em;
 }
 
 .legend{
-    margin-bottom:76px;
+    margin-bottom:50px;
     display:inline-block;
     border-collapse: collapse;
     border-spacing: 0px;
 }
 .legend td{
     padding:4px 5px;
-    vertical-align:bottom;
+    vertical-align:middle;
 }
 .legendFreq, .legendPerc{
     align:right;
