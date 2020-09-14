@@ -16,8 +16,11 @@ var freqData=[
 
 d3.csv(defectData, function(dataset) {
   data = dataset;
-  buildChart('#HorzBars')
-  dashboard('#Multi', freqData);
+  buildChart('#HorzBars', data)
+});
+d3.csv(wasteData, function(dataset) {
+  data = dataset;
+  dashboard('#Multi', data);
 });
 
 /* ---------------------- First dashboard ---------------------- */
@@ -161,10 +164,10 @@ function buildChart(id) {
 
 function dashboard(id, fData){
     var barColor = 'steelblue';
-    function segColor(c){ return {low:"#807dba", mid:"#e08214",high:"#41ab5d"}[c]; }
+    function segColor(c){ return {Sup1:"#807dba", Sup2:"#e08214"}[c]; }
 
     // compute total for each state.
-    fData.forEach(function(d){d.total=d.freq.low+d.freq.mid+d.freq.high;});
+    fData.forEach(function(d){d.total=d.Sup1+d.Sup2;});
 
     // function to handle histogram.
     function histoGram(fD){
