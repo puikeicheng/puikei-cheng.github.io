@@ -30,13 +30,20 @@ d3.csv(mDData, function(data) {
     }
   }
 
-  // Compress attributes
+  // Compress attributes into supplier
   dataset.forEach(function(d){d.Waste.totalSup1=d3.sum(d.Waste.Sup1);
                               d.Waste.totalSup2=d3.sum(d.Waste.Sup2);})
-  var date_v_Sup = dataset.map(function(d){return [d.Date,d.Waste.totalSup1,
-                                                       d.Waste.totalSup2];});
-  console.log()
-  // Compress dates
+  var date_v_Sup = dataset.map(function(d){return [d.Date,
+                                                   d.Waste.totalSup1,
+                                                   d.Waste.totalSup2];});
+  // Compress dates into attribute
+  console.log(dataset)
+  // dataset.forEach(function(d){d.Waste.totalSup1=d3.sum(d.Waste.Sup1);
+  //                             d.Waste.totalSup2=d3.sum(d.Waste.Sup2);})
+  var date_v_Att = dataset.map(function(d){return [d.Date,
+                                                   d.Waste.totalSup1,
+                                                   d.Waste.totalSup2];});
+
 
   Line_Pie('#SupplierWaste', date_v_Sup);
   // Bar_Line('#AttributeDefect', dataset);
@@ -46,14 +53,12 @@ d3.csv(mDData, function(data) {
 
 function Line_Pie(id, data){
 
-  /* ------- Pre-process data  ------- */
   var wData = [];
     for (var i = 0; i < data.length; i++) {
       wData.push({Date: data[i][0],
                   Waste: {Sup1: +data[i][1],
                           Sup2: +data[i][2]}});
   }
-  console.log(wData)
   // calculate total waste by segment for all dates
   wData.forEach(function(d){d.total=d.Waste.Sup1+d.Waste.Sup2;
                             d.mean=d.total/2});
@@ -226,7 +231,7 @@ function Line_Pie(id, data){
 
     // create the third column for each segment.
     tr.append("td").attr("class",'legendFreq')
-        .text(function(d){ return d3.format(".2%")(d.Waste);});
+        .text(function(d){ return d3.format(".2f")(d.Waste);});
 
     // create the fourth column for each segment.
     tr.append("td").attr("class",'legendPerc')
@@ -238,7 +243,7 @@ function Line_Pie(id, data){
         var l = legend.select("tbody").selectAll("tr").data(nD);
 
         // update waste.
-        l.select(".legendFreq").text(function(d){ return d3.format(".2%")(d.Waste);});
+        l.select(".legendFreq").text(function(d){ return d3.format(".2f")(d.Waste);});
 
         // update the percentage column.
         l.select(".legendPerc").text(function(d){ return getLegend(d,nD);});
@@ -255,6 +260,7 @@ function Line_Pie(id, data){
 /* ---------------------- Bar and Line dashboard ---------------------- */
 
 function Bar_Line(id, data) {
+  console.log(data)
 
   // Create and update subplots
   var hB = HorzBars(data),
