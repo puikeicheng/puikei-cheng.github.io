@@ -1,28 +1,20 @@
 var d3
 var defectData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_defect_rate.csv";
 var wasteData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_waste_rate.csv";
-var freqData=[
-{State:'AL',freq:{low:4786, mid:1319, high:249}}
-,{State:'AZ',freq:{low:1101, mid:412, high:674}}
-,{State:'CT',freq:{low:932, mid:2149, high:418}}
-,{State:'DE',freq:{low:832, mid:1152, high:1862}}
-,{State:'FL',freq:{low:4481, mid:3304, high:948}}
-,{State:'GA',freq:{low:1619, mid:167, high:1063}}
-,{State:'IA',freq:{low:1819, mid:247, high:1203}}
-,{State:'IL',freq:{low:4498, mid:3852, high:942}}
-,{State:'IN',freq:{low:797, mid:1849, high:1534}}
-,{State:'KS',freq:{low:162, mid:379, high:471}}
-];
 
 d3.csv(defectData, function(dataset) {
   data = dataset;
-  buildChart('#HorzBars')
-  dashboard('#Multi', freqData);
+  buildChart('#AttributeDefect', data)
+});
+d3.csv(wasteData, function(dataset) {
+  wData = dataset;
+
+  dashboard('#SupplierWaste', wData);
 });
 
 /* ---------------------- First dashboard ---------------------- */
 
-function buildChart(id) {
+function buildChart(id, data) {
 
   /* ===== SET UP CHART =====*/
 
@@ -50,9 +42,8 @@ function buildChart(id) {
 
   var xAxis = d3.axisBottom()
     .scale(xScale)
-    .ticks(5)
+    .ticks(5,'.2%')
     .tickSize(-h, 0)
-    // .tickFormat(format('%'));
   var yAxis = d3.axisLeft()
     .scale(yScale);
 
@@ -159,12 +150,10 @@ function buildChart(id) {
 
 /* ---------------------- Second dashboard ---------------------- */
 
-function dashboard(id, fData){
-    var barColor = 'steelblue';
-    function segColor(c){ return {low:"#807dba", mid:"#e08214",high:"#41ab5d"}[c]; }
+function dashboard(id, data){
 
-    // compute total for each state.
-    fData.forEach(function(d){d.total=d.freq.low+d.freq.mid+d.freq.high;});
+    var barColor = 'DarkGray';
+    function segColor(c){ return {Sup1:"DarkGreen", Sup2:"SteelBlue"}[c]; }
 
     // function to handle histogram.
     function histoGram(fD){
@@ -191,7 +180,7 @@ function dashboard(id, fData){
         var y = d3.scale.linear().range([hGDim.h, 0])
                 .domain([0, d3.max(fD, function(d) { return d[1]; })]);
 
-        // Create bars for histogram to contain rectangles and freq labels.
+        // Create bars for histogram to contain rectangles and waste labels.
         var bars = hGsvg.selectAll(".bar").data(fD).enter()
                 .append("g").attr("class", "bar");
 
@@ -205,16 +194,16 @@ function dashboard(id, fData){
             .on("mouseover",mouseover)// mouseover is defined below.
             .on("mouseout",mouseout);// mouseout is defined below.
 
-        //Create the frequency labels above the rectangles.
+        //Create the waste labels above the rectangles.
         bars.append("text").text(function(d){ return d3.format(",")(d[1])})
             .attr("x", function(d) { return x(d[0])+x.rangeBand()/2; })
             .attr("y", function(d) { return y(d[1])-5; })
             .attr("text-anchor", "middle");
 
         function mouseover(d){  // utility function to be called on mouseover.
-            // filter for selected state.
-            var st = fData.filter(function(s){ return s.State == d[0];})[0],
-                nD = d3.keys(st.freq).map(function(s){ return {type:s, freq:st.freq[s]};});
+            // filter for selected date.
+            var st = wData.filter(function(s){ return s.Date == d[0];})[0],
+                nD = d3.keys(st.Waste).map(function(s){ return {type:s, Waste:st.Waste[s]};});
 
             // call update functions of pie-chart and legend.
             pC.update(nD);
@@ -229,7 +218,7 @@ function dashboard(id, fData){
 
         // create function to update the bars. This will be used by pie-chart.
         hG.update = function(nD, color){
-            // update the domain of the y-axis map to reflect change in frequencies.
+            // update the domain of the y-axis map to reflect change in waste.
             y.domain([0, d3.max(nD, function(d) { return d[1]; })]);
 
             // Attach the new data to the bars.
@@ -241,7 +230,7 @@ function dashboard(id, fData){
                 .attr("height", function(d) { return hGDim.h - y(d[1]); })
                 .attr("fill", color);
 
-            // transition the frequency labels location and change value.
+            // transition the waste labels location and change value.
             bars.select("text").transition().duration(500)
                 .text(function(d){ return d3.format(",")(d[1])})
                 .attr("y", function(d) {return y(d[1])-5; });
@@ -251,7 +240,7 @@ function dashboard(id, fData){
 
     // function to handle pieChart.
     function pieChart(pD){
-        var pC ={},    pieDim ={w:250, h: 250};
+        var pC ={},    pieDim ={w:150, h: 150};
         pieDim.r = Math.min(pieDim.w, pieDim.h) / 2;
 
         // create svg for pie chart.
@@ -263,7 +252,7 @@ function dashboard(id, fData){
         var arc = d3.svg.arc().outerRadius(pieDim.r - 10).innerRadius(0);
 
         // create a function to compute the pie slice angles.
-        var pie = d3.layout.pie().sort(null).value(function(d) { return d.freq; });
+        var pie = d3.layout.pie().sort(null).value(function(d) { return d.Waste; });
 
         // Draw the pie slices.
         piesvg.selectAll("path").data(pie(pD)).enter().append("path").attr("d", arc)
@@ -279,14 +268,14 @@ function dashboard(id, fData){
         // Utility function to be called on mouseover a pie slice.
         function mouseover(d){
             // call the update function of histogram with new data.
-            hG.update(fData.map(function(v){
-                return [v.State,v.freq[d.data.type]];}),segColor(d.data.type));
+            hG.update(wData.map(function(v){
+                return [v.Date,v.Waste[d.data.type]];}),segColor(d.data.type));
         }
         //Utility function to be called on mouseout a pie slice.
         function mouseout(d){
             // call the update function of histogram with all data.
-            hG.update(fData.map(function(v){
-                return [v.State,v.total];}), barColor);
+            hG.update(wData.map(function(v){
+                return [v.Date,v.total];}), barColor);
         }
         // Animating the pie-slice requiring a custom function which specifies
         // how the intermediate paths should be drawn.
@@ -309,16 +298,16 @@ function dashboard(id, fData){
         var tr = legend.append("tbody").selectAll("tr").data(lD).enter().append("tr");
 
         // create the first column for each segment.
-        tr.append("td").append("svg").attr("width", '16').attr("height", '16').append("rect")
-            .attr("width", '16').attr("height", '16')
-			.attr("fill",function(d){ return segColor(d.type); });
+        tr.append("td").append("svg").attr("width", '14').attr("height", '14').append("rect")
+            .attr("width", '14').attr("height", '14')
+			      .attr("fill",function(d){ return segColor(d.type); });
 
         // create the second column for each segment.
         tr.append("td").text(function(d){ return d.type;});
 
         // create the third column for each segment.
         tr.append("td").attr("class",'legendFreq')
-            .text(function(d){ return d3.format(",")(d.freq);});
+            .text(function(d){ return d3.format(".2%")(d.Waste);});
 
         // create the fourth column for each segment.
         tr.append("td").attr("class",'legendPerc')
@@ -329,27 +318,38 @@ function dashboard(id, fData){
             // update the data attached to the row elements.
             var l = legend.select("tbody").selectAll("tr").data(nD);
 
-            // update the frequencies.
-            l.select(".legendFreq").text(function(d){ return d3.format(",")(d.freq);});
+            // update waste.
+            l.select(".legendFreq").text(function(d){ return d3.format(".2%")(d.Waste);});
 
             // update the percentage column.
             l.select(".legendPerc").text(function(d){ return getLegend(d,nD);});
         }
 
         function getLegend(d,aD){ // Utility function to compute percentage.
-            return d3.format("%")(d.freq/d3.sum(aD.map(function(v){ return v.freq; })));
+            return d3.format(".2%")(d.Waste/d3.sum(aD.map(function(v){ return v.Waste; })));
         }
 
         return leg;
     }
 
-    // calculate total frequency by segment for all state.
-    var tF = ['low','mid','high'].map(function(d){
-        return {type:d, freq: d3.sum(fData.map(function(t){ return t.freq[d];}))};
+    // nest data
+    var wData = [];
+    for (var i = 0; i < data.length; i++) {
+      wData.push({Date: data[i]['Date'],
+                  Waste: {Sup1: +data[i]['Sup1'],
+                         Sup2: +data[i]['Sup2']}});
+    }
+    // calculate total waste by segment for all date.
+    wData.forEach(function(d){d.total=d.Waste.Sup1+d.Waste.Sup2;
+                                d.mean=d.total/2});
+    // compute total for each date.
+    var tF = ['Sup1','Sup2'].map(function(d){
+        return {type:d, Waste: d3.mean(wData.map(function(t){return t.Waste[d];}))};
     });
 
-    // calculate total frequency by state for all segment.
-    var sF = fData.map(function(d){return [d.State,d.total];});
+    // calculate total waste by date for all segment.
+    var sF = wData.map(function(d){return [d.Date,d.total];});
+    console.log(wData)
 
     var hG = histoGram(sF), // create the histogram.
         pC = pieChart(tF), // create the pie-chart.
