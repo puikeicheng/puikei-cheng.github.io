@@ -3,32 +3,42 @@ var mDData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.i
 var defectData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_defect_rate.csv";
 var wasteData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_waste_rate.csv";
 
-d3.csv(wasteData, function(dataset) {
-  wData = dataset;
-
-  Line_Pie('#SupplierWaste', wData);
-});
+// d3.csv(wasteData, function(dataset) {
+//   wData = dataset;
+//   Line_Pie('#SupplierWaste', wData);
+// });
 d3.csv(defectData, function(dataset) {
   data = dataset;
   Bar_Line('#AttributeDefect', data)
 });
 
 d3.csv(mDData, function(data) {
+  /* ----- Pre-process data (nest multiD array) ----- */
   var dataset   = [];
+  var dl = data.length/2    // date length
   var attriCols = data.columns.filter(function(att) {return att.includes('Attr')})
-  for (var i = 0; i < data.length/2; i++) {
+  for (var i = 0; i < dl; i++) {
     dataset.push({Date: data[i]['Date'],
-                Waste: {Sup1: [],
-                        Sup2: []}});
+                 Waste: {Sup1: [],
+                         Sup2: []}});
   }
-  console.log(dataset.Waste)
-  for (var i = 0; i < attriCols.length; i++) {
-    (dataset.Waste).push(i);
-    (dataset.Waste.Sup2).push(i);
+  for (var i = 0; i < dl; i++) {
+    for (var j = 0; j < attriCols.length; j++) {
+      (dataset[i].Waste.Sup1).push(data[i   ][attriCols[j]]);
+      (dataset[i].Waste.Sup2).push(data[i+dl][attriCols[j]]);
+
+    }
   }
-  console.log(dataset)
-  // console.log(dataset)
-  // Line_Pie('#SupplierWaste', dataset);
+
+  // Compress attributes
+  dataset.forEach(function(d){d.Waste.totalSup1=d3.sum(d.Waste.Sup1);
+                              d.Waste.totalSup2=d3.sum(d.Waste.Sup2);})
+  var date_v_Sup = dataset.map(function(d){return [d.Date,d.Waste.totalSup1,
+                                                       d.Waste.totalSup2];});
+  console.log()
+  // Compress dates
+
+  Line_Pie('#SupplierWaste', date_v_Sup);
   // Bar_Line('#AttributeDefect', dataset);
 });
 
@@ -36,16 +46,17 @@ d3.csv(mDData, function(data) {
 
 function Line_Pie(id, data){
 
-  /* ------- Pre-process data (nested array) ------- */
+  /* ------- Pre-process data  ------- */
   var wData = [];
-  for (var i = 0; i < data.length; i++) {
-    wData.push({Date: data[i]['Date'],
-                Waste: {Sup1: +data[i]['Sup1'],
-                       Sup2: +data[i]['Sup2']}});
+    for (var i = 0; i < data.length; i++) {
+      wData.push({Date: data[i][0],
+                  Waste: {Sup1: +data[i][1],
+                          Sup2: +data[i][2]}});
   }
+  console.log(wData)
   // calculate total waste by segment for all dates
   wData.forEach(function(d){d.total=d.Waste.Sup1+d.Waste.Sup2;
-                              d.mean=d.total/2});
+                            d.mean=d.total/2});
   // compute total for each date
   var tF = ['Sup1','Sup2'].map(function(d){
       return {type:d, Waste: d3.mean(wData.map(function(t){return t.Waste[d];}))};
