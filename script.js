@@ -1,7 +1,6 @@
 var d3
 var mDData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_multiD.csv";
 var defectData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_defect_rate.csv";
-var wasteData = "https://raw.githubusercontent.com/puikeicheng/puikeicheng.github.io/master/INSP_waste_rate.csv";
 
 // d3.csv(wasteData, function(dataset) {
 //   wData = dataset;
@@ -38,20 +37,23 @@ d3.csv(mDData, function(data) {
                                                    d.Waste.totalSup1,
                                                    d.Waste.totalSup2];});
 
-  // Compress dates into attribute
-  // var byAttribute = d3.nest()
-  //                      .key(function(d){return d.Date})
-  //                      .entries(function(d){return d.Facility})
-  // console.log(byAttribute)
-
   Line_Pie('#SupplierWaste', date_v_Sup);
   // Bar_Line('#AttributeDefect', dataset);
+
+  // Nest data by desired feature
+  var byDate = d3.nest()
+                 .key(function(d) {return d.Date; })
+                 .key(function(d) {return d.Facility; })
+                 // .rollup(function(v) { return d3.sum(v, function(d) { return d['Attribute 1']; }); })
+                 .entries(data);
+  // console.log(byDate)
+
 });
 
 /* ---------------------- Line and Pie dashboard ---------------------- */
 
 function Line_Pie(id, data){
-
+  // console.log(data)
   var wData = [];
     for (var i = 0; i < data.length; i++) {
       wData.push({Date: data[i][0],
