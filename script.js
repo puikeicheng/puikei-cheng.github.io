@@ -14,6 +14,7 @@ d3.csv(defectData, function(dataset) {
 
 d3.csv(mDData, function(data) {
   /* ----- Pre-process data (nest multiD array) ----- */
+
   var dataset   = [];
   var dl = data.length/2    // date length
   var attriCols = data.columns.filter(function(att) {return att.includes('Attr')})
@@ -36,14 +37,12 @@ d3.csv(mDData, function(data) {
   var date_v_Sup = dataset.map(function(d){return [d.Date,
                                                    d.Waste.totalSup1,
                                                    d.Waste.totalSup2];});
-  // Compress dates into attribute
-  console.log(dataset)
-  // dataset.forEach(function(d){d.Waste.totalSup1=d3.sum(d.Waste.Sup1);
-  //                             d.Waste.totalSup2=d3.sum(d.Waste.Sup2);})
-  var date_v_Att = dataset.map(function(d){return [d.Date,
-                                                   d.Waste.totalSup1,
-                                                   d.Waste.totalSup2];});
 
+  // Compress dates into attribute
+  // var byAttribute = d3.nest()
+  //                      .key(function(d){return d.Date})
+  //                      .entries(function(d){return d.Facility})
+  // console.log(byAttribute)
 
   Line_Pie('#SupplierWaste', date_v_Sup);
   // Bar_Line('#AttributeDefect', dataset);
@@ -260,7 +259,6 @@ function Line_Pie(id, data){
 /* ---------------------- Bar and Line dashboard ---------------------- */
 
 function Bar_Line(id, data) {
-  console.log(data)
 
   // Create and update subplots
   var hB = HorzBars(data),
