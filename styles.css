@@ -16,22 +16,28 @@ svg {
   margin: 10px 10px;
 }
 
-path {  stroke: #F9F9F9; }
-  .axis {  font: 10px sans-serif; }
-
 .line {
     fill: none;
-    stroke: DarkGray;
-    stroke-width: 1.5px;
+    stroke: Black;
+    stroke-width: 1.25px;
+    shape-rendering: crispEdges;
+    opacity: 0.5;
   }
 
-.axis path {
+.ticks path {
   fill: none;
+  stroke: DarkGray;
+  opacity: 0.5;
+}
+.ticks line {
+  fill: none;
+  stroke: DarkGray;
+  opacity: 0.7;
   shape-rendering: crispEdges;
 }
-.axis ticks {
-  fill: lightgrey;
-  shape-rendering: crispEdges;
+.ticks text {
+  font-size: 1.5em;
+  font: 14px arial;
 }
 
 .toolTip {
@@ -47,7 +53,7 @@ path {  stroke: #F9F9F9; }
 }
 
 .legend{
-    margin-bottom:50px;
+    margin-bottom:40px;
     display:inline-block;
     border-collapse: collapse;
     border-spacing: 0px;
@@ -57,7 +63,7 @@ path {  stroke: #F9F9F9; }
     vertical-align:middle;
 }
 .legendFreq, .legendPerc{
-    align:right;
+    align:middle;
     width:50px;
 }
 .legend tr{    border-bottom:1px solid grey; }

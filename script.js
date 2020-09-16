@@ -48,7 +48,8 @@ function Line_Pie(id, data){
   /* -------------- Plot functions -------------- */
   // function to handle histogram
   function histoGram(fD){
-    var hG={},    hGDim = {t: 60, r: 0, b: 30, l: 0};
+    var hG={},
+    hGDim = {t: 60, r: 0, b: 30, l: 0};
     hGDim.w = 400 - hGDim.l - hGDim.r,
     hGDim.h = 300 - hGDim.t - hGDim.b;
 
@@ -57,7 +58,6 @@ function Line_Pie(id, data){
         .attr("width", hGDim.w + hGDim.l + hGDim.r)
         .attr("height", hGDim.h + hGDim.t + hGDim.b).append("g")
         .attr("transform", "translate(" + hGDim.l + "," + hGDim.t + ")");
-
 
     var xScale = d3.scaleBand()
       .domain(fD.map(function(d) { return d[0]; }))
@@ -71,16 +71,11 @@ function Line_Pie(id, data){
     var yAxis = d3.axisLeft()
       .scale(yScale);
 
-    // Add x-axis to the histogram svg.
-    hGsvg.append("g").attr("class", "x axis")
-        .attr("transform", "translate(0," + hGDim.h + ")")
-
     // Create bars for histogram to contain rectangles and waste labels.
     var bars = hGsvg.selectAll("hGsvg")
                     .data(fD)
                     .enter()
                     .append("g")
-                    .attr("class", "bar");
 
     //create the rectangles.
     var barwidth = 25
@@ -100,13 +95,13 @@ function Line_Pie(id, data){
         .attr("y", function(d) { return yScale(d[1])-5; })
         .attr("text-anchor", "middle");
 
-    bars.append('g')
-      .style('font', '12px arial')
+    hGsvg.append('g')
+      .attr('class', 'ticks')
       .attr("transform", "translate( 0 ," + hGDim.h + ")")
       .call(xAxis)
       .selectAll("text")
         .style("text-anchor", "end")
-        .attr("transform", "rotate(-65)");
+        .attr("transform", "rotate(-45)");
 
     function mouseover(d){  // utility function to be called on mouseover.
         // filter for selected date.
@@ -148,7 +143,8 @@ function Line_Pie(id, data){
 
   // function to handle pieChart
   function pieChart(pD){
-    var pC ={},    pieDim ={w:150, h: 150};
+    var pC ={},
+    pieDim ={w:150, h: 150};
     pieDim.r = Math.min(pieDim.w, pieDim.h) / 2;
 
     // create svg for pie chart.
@@ -275,6 +271,7 @@ function Bar_Line(id, data) {
                                  Waste: group.value
                                 }
                               });
+
   // Create and update subplots
   var hB = HorzBars(byAttrib),
       lP = LinePlot(temp);
@@ -282,8 +279,9 @@ function Bar_Line(id, data) {
   /* -------------- Plot functions -------------- */
   // function to handle horizontal bar chart
   function HorzBars(data){
-    /* ===== SET UP CHART =====*/
+    var hB={};
 
+    /* ===== SET UP CHART =====*/
     var w = 300;
     var barSpacing = 20;
     var barThickness = 15;
@@ -337,30 +335,24 @@ function Bar_Line(id, data) {
 
     /* Axis and gridlines */
     hB.append('g')
-      .style('font', '16px arial')
       .attr('class', 'ticks')
       .call(xAxis);
     hB.append('g')
-      .style('font', '16px arial')
       .attr('class', 'ticks')
       .call(yAxis);
 
    /* ===== LABELS =====*/
 
    hB.append("text")
-      .attr("transform", "translate(0,0)")
       .attr("x", w/2 - margin.left)
-      .attr("y", 0)
+      .attr("y", 0 - margin.top/2)
       .attr("font-size", "18px")
       .text("Attribute vs Waste")
-
    hB.append("text")
-      .attr("transform",
-         "translate(" + ((w/2) ) + "," +
-                        (h + margin.bottom/2) + ")")
+     .attr("x", (w/2))
+     .attr("y", (h + margin.bottom/2))
       .style("text-anchor", "start")
       .text("Waste");
-
    hB.append("text")
       .attr("x", -w/2)
       .attr("y", -margin.left)
@@ -369,10 +361,10 @@ function Bar_Line(id, data) {
       .attr("transform", "rotate(-90)")
       .text("Attribute");
 
-  /* ===== Mouse effects ===== */
+    /* ===== Mouse effects ===== */
     hB.selectAll("g")
      .data(data)
-     .on("click",     onMouseClick) //Add listener for the mouseclick event
+     .on("click",     function(d) {onMouseClick(d)}) //Add listener for the mouseclick event
      .on("mouseover", function(d) {onMouseOver(d)}) //Add listener for the mouseover event
      .on("mouseout",  onMouseOut)   //Add listener for the mouseout event
      .attr("x",       function(d) { return xScale(d.Attribute); })
@@ -395,6 +387,8 @@ function Bar_Line(id, data) {
         .select('rect')
         .transition().duration(50)
         .style('fill', 'SteelBlue');
+
+      // lP.update(aData);
     }
     //mouseover event handler function
     function onMouseOver(d) {
@@ -412,8 +406,8 @@ function Bar_Line(id, data) {
   // function to handle line plot
 
   function LinePlot(data){
+    var lP={}
 
-    var lP={},
     lPDim = {top: 30, right: 30, bottom: 30, left: 30};
     lPDim.width = 400 - lPDim.left - lPDim.right,
     lPDim.height = 300 - lPDim.top - lPDim.bottom;
@@ -435,11 +429,11 @@ function Bar_Line(id, data) {
     var xAxis = d3.axisBottom()
        .scale(xScale)
        .ticks(data.length)
-       .tickSize(lPDim.height, 0);
+       .tickSize(-lPDim.height);
     var yAxis = d3.axisLeft()
        .scale(yScale)
        .ticks(5)
-       .tickSize(0, lPDim.width);
+       .tickSize(-lPDim.width);
 
     // Create the lines
     var group = lPsvg.selectAll("lPsvg")
@@ -449,34 +443,43 @@ function Bar_Line(id, data) {
     var valueline = d3.svg.line()
       .x(function(d) { return xScale(d.Date); })
       .y(function(d) { return yScale(d.Waste); });
-
     var lines = group
       .append("path")
       .attr("d", valueline(data))
-      // .attr("y", function(d) { return yScale(d.Waste); })
       .attr("class", "line")
-      .attr("fill", "none")
-      .attr("stroke", "steelblue")
-      .attr("stroke-width", 1.5)
 
     lPsvg.append("g")
-      .attr("class", "axis")
+      .attr("class", "ticks")
       .attr("transform", "translate(0," + lPDim.height + ")")
-      .call(d3.axisBottom(xScale))
+      .call(xAxis)
       .selectAll("text")
         .style("text-anchor", "end")
-        .attr("transform", "rotate(-65)");
+        .attr("transform", "rotate(-45)");
     lPsvg.append("g")
-      .attr("class", "axis")
-      .call(d3.axisLeft(yScale));
+      .attr("class", "ticks")
+      .call(yAxis);
 
-        // .on("mouseover",mouseover)// mouseover is defined below.
-        // .on("mouseout",mouseout);// mouseout is defined below.
-
-    //Create the waste labels above the rectangles.
-    // bars.append("text").text(function(d){ return d3.format(",")(d[1])})
-    //     .attr("x", function(d) { return x(d[0])+x.rangeBand()/2; })
-    //     .attr("y", function(d) { return y(d[1])-5; })
-    //     .attr("text-anchor", "middle");
   }
+  return lP;
+
+  // create function to update line plot
+  lP.update = function(data){
+      // update the domain of the y-axis map to reflect change in waste.
+      yScale.domain([0, d3.max(nD, function(d) { return d[1]; })])
+
+      // Attach the new data to the bars.
+      var bars = hGsvg.selectAll(".bar").data(nD);
+
+      // transition the height and color of rectangles.
+      bars.select("rect").transition().duration(500)
+          .attr("y", function(d) {return yScale(d[1]); })
+          .attr("height", function(d) { return hGDim.h - yScale(d[1]); })
+          .attr("fill", color);
+
+      // transition the waste labels location and change value.
+      bars.select("text").transition().duration(500)
+          .text(function(d){ return d3.format(",")(d[1])})
+          .attr("y", function(d) {return yScale(d[1])-5; });
+  }
+  return hG;
 }
