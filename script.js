@@ -297,7 +297,7 @@ function Bar_Line(id, data) {
     var barThickness = 15;
     var vertPadding = 5;
     var h = barSpacing * aData.length + vertPadding;
-    var margin = {top: 50, right: 50, bottom: 100, left: 100},
+    var margin = {top: 50, right: 50, bottom: 50, left: 100},
       width = w + margin.left + margin.right,
       height = h + margin.top + margin.bottom;
 
@@ -305,6 +305,7 @@ function Bar_Line(id, data) {
             .append('svg')
             .attr('width', width )
             .attr('height', height )
+            .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     var xScale = d3.scaleLinear()
@@ -333,12 +334,12 @@ function Bar_Line(id, data) {
       .append('g')
       // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     var hbars = group
-        .append('rect')
-        .attr("class", 'hbar')
-        .attr('y', function(d, i) {return i * (barSpacing) + vertPadding})
-        .attr('height', barThickness)
-        .attr('width', function(d) {return xScale(d.Waste)})
-        .attr('fill' , function (d,i) {return setBarColors(d,i);})
+      .append('rect')
+      .attr("class", 'hbar')
+      .attr('y', function(d, i) {return i * (barSpacing) + vertPadding})
+      .attr('height', barThickness)
+      .attr('width', function(d) {return xScale(d.Waste)})
+      .attr('fill' , function (d,i) {return setBarColors(d,i);})
 
     /* Axis and gridlines */
     hB.append('g')
@@ -351,11 +352,11 @@ function Bar_Line(id, data) {
    /* ===== LABELS =====*/
    hB.append("text")
       .attr("x", w/2 - margin.left)
-      .attr("y", 0 - margin.top/2)
+      .attr("y", -margin.top/2)
       .text("Attribute vs Waste")
    hB.append("text")
-     .attr("x", (w/2))
-     .attr("y", (h + margin.bottom/2))
+     .attr("x", w/2 - margin.left)
+     .attr("y", (h + margin.bottom))
       .style("text-anchor", "start")
       .text("Waste");
    hB.append("text")

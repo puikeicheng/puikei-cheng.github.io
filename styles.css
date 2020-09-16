@@ -38,6 +38,7 @@ svg {
 .ticks text {
   font-size: 1.5em;
   font: 14px arial;
+  text-align: center;
 }
 
 .toolTip {
