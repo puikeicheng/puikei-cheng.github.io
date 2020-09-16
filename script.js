@@ -41,9 +41,9 @@ function Line_Pie(id, data){
   function segColor(c){ return {Sup1:"DarkGreen", Sup2:"SteelBlue"}[c]; }
 
   // Create and update subplots
-  var hG = histoGram(sF), // create the histogram
-      pC = pieChart(tF), // create the pie-chart
-      leg= legend(tF);  // create the legend
+  var hG  = histoGram(sF), // create the histogram
+      pC  = pieChart(tF), // create the pie-chart
+      leg = legend(tF);  // create the legend
 
   /* -------------- Plot functions -------------- */
   // function to handle histogram
@@ -224,10 +224,12 @@ function Line_Pie(id, data){
         var l = legend.select("tbody").selectAll("tr").data(nD);
 
         // update waste.
-        l.select(".legendFreq").text(function(d){ return d3.format(".2f")(d.Facility);});
+        l.select(".legendFreq")
+         .text(function(d){ return d3.format(".2f")(d.Facility);});
 
         // update the percentage column.
-        l.select(".legendPerc").text(function(d){ return getLegend(d,nD);});
+        l.select(".legendPerc")
+         .text(function(d){ return getLegend(d,nD);});
     }
 
     function getLegend(d,aD){ // Utility function to compute percentage.
@@ -241,53 +243,60 @@ function Line_Pie(id, data){
 /* ---------------------- Bar and Line dashboard ---------------------- */
 
 function Bar_Line(id, data) {
-  const tParse = d3.timeParse("%d-%b-%y")
 
   // Pre-process data
-  var byAttrib = d3.nest()
-                 .key(function(d) {return d.Attribute; })
-                 .rollup(function(v) { return d3.sum(v, function(d) { return d.Waste; }); })
-                 .entries(data)
-                 .map(function(group) {
-                      return {
-                        Attribute: group.key,
-                        Waste    : group.value
-                       }
-                     });
+  const tParse = d3.timeParse("%d-%b-%y")
+  function byAttrib(data){
+    var aData = d3.nest()
+                   .key(function(d) {return d.Attribute; })
+                   .rollup(function(v) { return d3.sum(v, function(d) { return d.Waste; }); })
+                   .entries(data)
+                   .map(function(group) {
+                        return {
+                          Attribute: group.key,
+                          Waste    : group.value
+                         }
+                       });
+    return aData
+  }
 
-  var AWD = d3.nest()
-                .key(function(d) {return d.Attribute; })
-                .key(function(d) {return d.Date; })
-                .rollup(function(v) { return d3.sum(v, function(d) { return d.Waste; }); })
-                .entries(data)
-                .map(function(group) {
-                     return {
-                       Attribute: group.key,
-                       Waste    : group.values
-                      }
-                    });
-  var temp = AWD[0].Waste.map(function(group) {
-                               return {
-                                 Date : tParse(group.key),
-                                 Waste: group.value
-                                }
-                              });
+  function Select_AD(data, nAttri){
+    var byAttrib = d3.nest()
+                  .key(function(d) {return d.Attribute; })
+                  .key(function(d) {return d.Date; })
+                  .rollup(function(v) { return d3.sum(v, function(d) { return d.Waste; }); })
+                  .entries(data)
+                  .map(function(group) {
+                       return {
+                         Attribute: group.key,
+                         Waste    : group.values
+                        }
+                      });
+    var AD = byAttrib[nAttri].Waste.map(function(group) {
+                                 return {
+                                   Date : tParse(group.key),
+                                   Waste: group.value
+                                  }
+                                });
+    return AD
+  }
 
   // Create and update subplots
-  var hB = HorzBars(byAttrib),
-      lP = LinePlot(temp);
+  var hB = HorzBars(data),
+      lP = LinePlot(data);
 
   /* -------------- Plot functions -------------- */
   // function to handle horizontal bar chart
   function HorzBars(data){
     var hB={};
+    aData = byAttrib(data)
 
     /* ===== SET UP CHART =====*/
     var w = 300;
     var barSpacing = 20;
     var barThickness = 15;
     var vertPadding = 5;
-    var h = barSpacing * data.length + vertPadding;
+    var h = barSpacing * aData.length + vertPadding;
     var margin = {top: 50, right: 50, bottom: 100, left: 100},
       width = w + margin.left + margin.right,
       height = h + margin.top + margin.bottom;
@@ -299,11 +308,11 @@ function Bar_Line(id, data) {
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     var xScale = d3.scaleLinear()
-      .domain([0, 1.05 * d3.max(data, function(d) { return d.Waste; })])
+      .domain([0, 1.05 * d3.max(aData, function(d) { return d.Waste; })])
       .range([0,w]);
     var yScale = d3.scaleBand()
-      .domain(data.map(function(d) { return d.Attribute; }))
-      .range([h,0]);
+      .domain(aData.map(function(d) { return d.Attribute; }))
+      .range([0,h]);
 
     var xAxis = d3.axisBottom()
       .scale(xScale)
@@ -318,9 +327,8 @@ function Bar_Line(id, data) {
       .style("opacity", 0.75);
 
   /* --- INITIALIZE BARS ---*/
-
     var group = hB.selectAll('hB')
-      .data(data)
+      .data(aData)
       .enter()
       .append('g')
       // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -328,11 +336,9 @@ function Bar_Line(id, data) {
         .append('rect')
         .attr("class", 'hbar')
         .attr('y', function(d, i) {return i * (barSpacing) + vertPadding})
-        .attr('height', function(d) {
-          return (barThickness) - yScale(
-            data.map(function(d) {return d.Attribute; })[data.length-1])})
+        .attr('height', barThickness)
         .attr('width', function(d) {return xScale(d.Waste)})
-        .attr('fill', function (d,i) {return setBarColors(d,i);});
+        .attr('fill' , function (d,i) {return setBarColors(d,i);})
 
     /* Axis and gridlines */
     hB.append('g')
@@ -343,11 +349,9 @@ function Bar_Line(id, data) {
       .call(yAxis);
 
    /* ===== LABELS =====*/
-
    hB.append("text")
       .attr("x", w/2 - margin.left)
       .attr("y", 0 - margin.top/2)
-      .attr("font-size", "18px")
       .text("Attribute vs Waste")
    hB.append("text")
      .attr("x", (w/2))
@@ -357,21 +361,21 @@ function Bar_Line(id, data) {
    hB.append("text")
       .attr("x", -w/2)
       .attr("y", -margin.left)
-      .attr("font-size", "18px")
       .style("text-anchor", "end")
       .attr("transform", "rotate(-90)")
       .text("Attribute");
 
     /* ===== Mouse effects ===== */
     hB.selectAll("g")
-     .data(data)
-     .on("click",     function(d) {onMouseClick(d)}) //Add listener for the mouseclick event
+     .data(aData)
+     .on("click",     onMouseClick) //Add listener for the mouseclick event
      .on("mouseover", function(d) {onMouseOver(d)}) //Add listener for the mouseover event
      .on("mouseout",  onMouseOut)   //Add listener for the mouseout event
      .attr("x",       function(d) { return xScale(d.Attribute); })
      .attr("y",       function(d) { return yScale(d.Waste); })
      .attr("width",   function(d) { return xScale(d.Waste); })
      .attr("height",  (barSpacing-barThickness))
+     .attr('attri',   function(d) {return d.Attribute});
 
     /* ===== Functions ===== */
 
@@ -381,7 +385,7 @@ function Bar_Line(id, data) {
         return colors[0];
     };
     //mouseover event handler function
-    function onMouseClick() {
+    function onMouseClick(d) {
       d3.selectAll('.hbar')
         .style('fill', setBarColors());
       d3.select(this)
@@ -389,7 +393,10 @@ function Bar_Line(id, data) {
         .transition().duration(50)
         .style('fill', 'SteelBlue');
 
-      // lP.update(aData);
+      var tAttri = d3.select(this).attr('attri')
+      var nAttri = parseInt(tAttri.match(/\d+$/))-1
+
+      lP.update(Select_AD(data,nAttri))
     }
     //mouseover event handler function
     function onMouseOver(d) {
@@ -397,6 +404,7 @@ function Bar_Line(id, data) {
           .style("top", d3.event.pageY - 25 + "px")
           .style("display", "inline-block")
           .text(d.Attribute +":  " + (d.Waste*100).toFixed(2) + "%");
+
     }
     //mouseout event handler function
     function onMouseOut() {
@@ -408,28 +416,29 @@ function Bar_Line(id, data) {
 
   function LinePlot(data){
     var lP={}
+    aData = Select_AD(data, 7)
 
     lPDim = {top: 30, right: 30, bottom: 30, left: 30};
     lPDim.width = 400 - lPDim.left - lPDim.right,
     lPDim.height = 300 - lPDim.top - lPDim.bottom;
 
     //create svg for histogram.
-    var lPsvg = d3.select(id).append("svg")
+    var lP = d3.select(id).append("svg")
         .attr("width",  lPDim.width  + lPDim.left + lPDim.right)
         .attr("height", lPDim.height + lPDim.top  + lPDim.bottom).append("g")
         .attr("transform", "translate(" + lPDim.left + "," + lPDim.top + ")");
 
     // create function for x-axis mapping
     var xScale = d3.scaleTime()
-       .domain(d3.extent(data, function(d) { return d.Date; }))
+       .domain(d3.extent(aData, function(d) { return d.Date; }))
        .range([0,lPDim.width]);
     var yScale = d3.scaleLinear()
-       .domain([0, 1.05 * d3.max(data, function(d) { return d.Waste; })])
+       .domain([0, 1.05 * d3.max(aData, function(d) { return d.Waste; })])
        .range([lPDim.height, 0]);
 
     var xAxis = d3.axisBottom()
        .scale(xScale)
-       .ticks(data.length)
+       .ticks(aData.length)
        .tickSize(-lPDim.height);
     var yAxis = d3.axisLeft()
        .scale(yScale)
@@ -437,50 +446,44 @@ function Bar_Line(id, data) {
        .tickSize(-lPDim.width);
 
     // Create the lines
-    var group = lPsvg.selectAll("lPsvg")
-      .data(data)
-      .enter()
-      .append('g')
     var valueline = d3.svg.line()
       .x(function(d) { return xScale(d.Date); })
       .y(function(d) { return yScale(d.Waste); });
-    var lines = group
+    lP.selectAll("lP")
+      .data(aData)
+      .enter()
+      .append('g')
       .append("path")
-      .attr("d", valueline(data))
-      .attr("class", "line")
+      .attr("d", valueline(aData))
+      .attr("class", "plotline")
 
-    lPsvg.append("g")
+    lP.append("g")
       .attr("class", "ticks")
       .attr("transform", "translate(0," + lPDim.height + ")")
       .call(xAxis)
       .selectAll("text")
         .style("text-anchor", "end")
         .attr("transform", "rotate(-45)");
-    lPsvg.append("g")
+    lP.append("g")
       .attr("class", "ticks")
       .call(yAxis);
 
+    // create function to update line plot
+    lP.update = function(data){
+        // Delete old plot line
+        d3.selectAll('.plotline').remove();
+
+        lP.selectAll("lP")
+          .data(data)
+          .enter()
+          // .append('g')E
+          .append("path")
+          .attr("d", valueline(data))
+          .attr("class", "plotline")
+        return lP
+    }
+
+    return lP;
+
   }
-  return lP;
-
-  // create function to update line plot
-  lP.update = function(data){
-      // update the domain of the y-axis map to reflect change in waste.
-      yScale.domain([0, d3.max(nD, function(d) { return d[1]; })])
-
-      // Attach the new data to the bars.
-      var bars = hGsvg.selectAll(".bar").data(nD);
-
-      // transition the height and color of rectangles.
-      bars.select("rect").transition().duration(500)
-          .attr("y", function(d) {return yScale(d[1]); })
-          .attr("height", function(d) { return hGDim.h - yScale(d[1]); })
-          .attr("fill", color);
-
-      // transition the waste labels location and change value.
-      bars.select("text").transition().duration(500)
-          .text(function(d){ return d3.format(",")(d[1])})
-          .attr("y", function(d) {return yScale(d[1])-5; });
-  }
-  return hG;
 }

@@ -165,7 +165,7 @@ Date,Facility,Attribute,Waste
 22-Mar-20,Sup2,Attribute 7,0
 29-Mar-20,Sup2,Attribute 7,0
 5-Apr-20,Sup2,Attribute 7,0
-12-Apr-20,Sup2,Attribute 7,0.09
+12-Apr-20,Sup2,Attribute 7,0.05
 19-Apr-20,Sup2,Attribute 7,0.01
 2-Feb-20,Sup1,Attribute 8,0
 9-Feb-20,Sup1,Attribute 8,0
@@ -182,7 +182,7 @@ Date,Facility,Attribute,Waste
 2-Feb-20,Sup2,Attribute 8,0
 9-Feb-20,Sup2,Attribute 8,0
 16-Feb-20,Sup2,Attribute 8,0.02
-23-Feb-20,Sup2,Attribute 8,0.5
+23-Feb-20,Sup2,Attribute 8,0.05
 1-Mar-20,Sup2,Attribute 8,0
 8-Mar-20,Sup2,Attribute 8,0
 15-Mar-20,Sup2,Attribute 8,0
@@ -213,7 +213,7 @@ Date,Facility,Attribute,Waste
 22-Mar-20,Sup2,Attribute 9,0
 29-Mar-20,Sup2,Attribute 9,0
 5-Apr-20,Sup2,Attribute 9,0
-12-Apr-20,Sup2,Attribute 9,0.09
+12-Apr-20,Sup2,Attribute 9,0.02
 19-Apr-20,Sup2,Attribute 9,0.03
 2-Feb-20,Sup1,Attribute 10,0
 9-Feb-20,Sup1,Attribute 10,0
@@ -260,7 +260,7 @@ Date,Facility,Attribute,Waste
 15-Mar-20,Sup2,Attribute 11,0.03
 22-Mar-20,Sup2,Attribute 11,0
 29-Mar-20,Sup2,Attribute 11,0
-5-Apr-20,Sup2,Attribute 11,0.06
+5-Apr-20,Sup2,Attribute 11,
 12-Apr-20,Sup2,Attribute 11,0.02
 19-Apr-20,Sup2,Attribute 11,0
 2-Feb-20,Sup1,Attribute 12,0

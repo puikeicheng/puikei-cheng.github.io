@@ -16,7 +16,7 @@ svg {
   margin: 10px 10px;
 }
 
-.line {
+.plotline {
     fill: none;
     stroke: Black;
     stroke-width: 1.25px;
