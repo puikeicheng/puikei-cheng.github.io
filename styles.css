@@ -3,31 +3,33 @@ body {
   font-family: "Segoe UI",Arial,sans-serif;
   padding: 50px;
 }
-
 h1 {
   font-family: "Segoe UI",Arial,sans-serif;
   font-size: 1.5em;
 }
-
 h4 {
   font-family: "Segoe UI",Arial,sans-serif;
   font-size: 1em;
 }
-
 svg {
   overflow: visible;
-  margin: 10px 20px;
+  margin: 10px 10px;
 }
 
-path {  stroke: #fff; }
-/* path:hover {  opacity:0.9; } */
-/* rect:hover {  fill:blue; } */
-.axis {  font: 10px sans-serif; }
-.legend tr{    border-bottom:1px solid grey; }
-.legend tr:first-child{    border-top:1px solid grey; }
+path {  stroke: #F9F9F9; }
+  .axis {  font: 10px sans-serif; }
 
-.axis path,
-.axis line {
+.line {
+    fill: none;
+    stroke: DarkGray;
+    stroke-width: 1.5px;
+  }
+
+.axis path {
+  fill: none;
+  shape-rendering: crispEdges;
+}
+.axis ticks {
   fill: lightgrey;
   shape-rendering: crispEdges;
 }
@@ -58,3 +60,5 @@ path {  stroke: #fff; }
     align:right;
     width:50px;
 }
+.legend tr{    border-bottom:1px solid grey; }
+.legend tr:first-child{    border-top:1px solid grey; }
