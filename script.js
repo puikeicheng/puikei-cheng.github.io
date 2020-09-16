@@ -76,6 +76,7 @@ function Line_Pie(id, data){
                     .data(fD)
                     .enter()
                     .append("g")
+                    .attr("class", "bar");
 
     //create the rectangles.
     var barwidth = 25
