@@ -154,10 +154,10 @@ function Line_Pie(id, data){
         .attr("transform", "translate("+pieDim.w/2+","+pieDim.h/2+")");
 
     // create function to draw the arcs of the pie slices.
-    var arc = d3.svg.arc().outerRadius(pieDim.r - 10).innerRadius(0);
+    var arc = d3.arc().outerRadius(pieDim.r - 10).innerRadius(0);
 
     // create a function to compute the pie slice angles.
-    var pie = d3.layout.pie().sort(null).value(function(d) { return d.Facility; });
+    var pie = d3.pie().sort(null).value(function(d) { return d.Facility; });
 
     // Draw the pie slices.
     piesvg.selectAll("path").data(pie(pD)).enter().append("path").attr("d", arc)
@@ -447,7 +447,7 @@ function Bar_Line(id, data) {
        .tickSize(-lPDim.width);
 
     // Create the lines
-    var valueline = d3.svg.line()
+    var valueline = d3.line()
       .x(function(d) { return xScale(d.Date); })
       .y(function(d) { return yScale(d.Waste); });
     lP.selectAll("lP")
